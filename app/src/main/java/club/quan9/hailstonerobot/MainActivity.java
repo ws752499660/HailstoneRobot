@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity
                     msgAdapter.notifyItemInserted(msgList.size()-1);
                     msgRecyclerView.scrollToPosition(msgList.size()-1);
                     inputText.setText("");
+                    testConnect.run();
                 }
             }
         });
