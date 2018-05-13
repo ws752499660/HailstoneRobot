@@ -1,15 +1,20 @@
 package club.quan9.hailstonerobot;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +23,9 @@ public class MainActivity extends AppCompatActivity
 {
 
     private List<Msg> msgList=new ArrayList<>();
+    EditText inputText;
+    RecyclerView msgRecyclerView;
+    MsgAdapter msgAdapter;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -46,10 +54,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initText();
-        final EditText inputText=(EditText) findViewById(R.id.input_text);
+        inputText=(EditText) findViewById(R.id.input_text);
         Button send=(Button) findViewById(R.id.send);
-        final RecyclerView msgRecyclerView=(RecyclerView) findViewById(R.id.recycler_view);
-        final MsgAdapter msgAdapter=new MsgAdapter(msgList);
+        msgRecyclerView=(RecyclerView) findViewById(R.id.recycler_view);
+        msgAdapter=new MsgAdapter(msgList);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         msgRecyclerView.setLayoutManager(layoutManager);
         msgRecyclerView.setAdapter(msgAdapter);
@@ -59,6 +67,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 String content=inputText.getText().toString();
+                Log.d("alphaTest", content);
                 if(!content.equals(""))
                 {
                     Msg msg=new Msg(content,Msg.TYPE_SENT);
@@ -66,19 +75,42 @@ public class MainActivity extends AppCompatActivity
                     msgAdapter.notifyItemInserted(msgList.size()-1);
                     msgRecyclerView.scrollToPosition(msgList.size()-1);
                     inputText.setText("");
-                    testConnect.run();
+                    JSONObject jsonObject=robotJson.createJson(content);
+                    connectRobot connect=new connectRobot(handler,jsonObject);
+                    connect.connect();
                 }
             }
         });
     }
 
+    private Handler handler=new Handler()
+    {
+        @Override
+        public void handleMessage(Message getMsg)
+        {
+            if(getMsg.what==0x2333)
+            {
+                String get=getMsg.getData().getString("get");
+                Log.d("alphaTest",get);
+                get=robotJson.getTextFromJson(get);
+                Log.d("alphaTest",get);
+                Msg msg=new Msg(get,Msg.TYPE_RECEIVED);
+                msgList.add(msg);
+                msgAdapter.notifyItemInserted(msgList.size()-1);
+                msgRecyclerView.scrollToPosition(msgList.size()-1);
+            }
+        }
+    };
+
+
+
     private void initText()
     {
-        Msg msg1=new Msg("我好。",Msg.TYPE_RECEIVED);
+        Msg msg1=new Msg("你好!欢迎和wily开发的大冰雹聊天━(*｀∀´*)ノ亻!。",Msg.TYPE_RECEIVED);
         msgList.add(msg1);
-        Msg msg2=new Msg("听不懂人话还是怎么着？",Msg.TYPE_RECEIVED);
+        /*Msg msg2=new Msg("听不懂人话还是怎么着？",Msg.TYPE_RECEIVED);
         msgList.add(msg2);
         Msg msg3=new Msg("傻逼，滚",Msg.TYPE_RECEIVED);
-        msgList.add(msg3);
+        msgList.add(msg3);*/
     }
 }
