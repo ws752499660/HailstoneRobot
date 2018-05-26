@@ -1,7 +1,13 @@
 package club.quan9.hailstonerobot;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PatternMatcher;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -47,8 +53,11 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId())
         {
             case R.id.about:
-                Toast.makeText(this, "关于页面正在施工中", Toast.LENGTH_SHORT).show();
+            {
+                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(intent);
                 break;
+            }
             default:
                 break;
         }
@@ -60,6 +69,8 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        checkPermission();
 
         Button voiceBtn = (Button) findViewById(R.id.voice_btn);
         SpeechUtility.createUtility(this, SpeechConstant.APPID + "= 5af68519");
@@ -172,6 +183,23 @@ public class MainActivity extends AppCompatActivity
         });
         dialog.show();
         Toast.makeText(this, "请开始说话", Toast.LENGTH_SHORT).show();
+    }
+
+    //用于Android 6.0后申请动态权限的检查和申请
+    private void checkPermission()
+    {
+        //检查是否已经赋予录音权限
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!=
+                PackageManager.PERMISSION_GRANTED)
+        {
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.RECORD_AUDIO))
+            {
+            }
+            else
+            {
+                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO},1);
+            }
+        }
     }
 
 }
