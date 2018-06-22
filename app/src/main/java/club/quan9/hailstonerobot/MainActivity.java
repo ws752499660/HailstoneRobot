@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //用于Android 6.0后申请动态权限的检查和申请
         checkPermission();
 
         Button voiceBtn = (Button) findViewById(R.id.voice_btn);
